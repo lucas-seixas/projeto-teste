@@ -1,0 +1,23 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+
+# VSCode
+.vscode/
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# Env files
+.env
+
+# Jupyter
+.ipynb_checkpoints
