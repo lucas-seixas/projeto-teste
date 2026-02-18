@@ -1,15 +1,19 @@
-[project]
+[tool.poetry]
 name = "projeto-teste"
 version = "0.1.0"
 description = "Projeto teste para ambiente profissional"
-authors = [
-    { name = "Lucas Seixas", email = "lseixasd@gmail.com" }
-]
+authors = ["Lucas Seixas Dias <lseixasd@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.12"
+packages = [{ include = "projeto_teste", from = "src" }]
 
-[tool.pytest.ini_options]
-pythonpath = ["src"]
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+black = "^26.1.0"
+ruff = "^0.15.1"
+pytest = "^8.0"
+pre-commit = "^3.7.0"
 
 [tool.black]
 line-length = 88
@@ -21,3 +25,12 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
+
+# E → erros estilo pycodestyle
+# F → erros lógicos (pyflakes)
+# I → ordenação de imports
+# UP → melhorias modernas de sintaxe
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
