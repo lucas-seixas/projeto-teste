@@ -1,27 +1,30 @@
-# -------- Base stage --------
+# -------- Base --------
 FROM python:3.12-slim AS base
 
-# Evita geração de arquivos .pyc e ativa stdout imediato
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Diretório de trabalho
-WORKDIR /app
-
 # Instala dependências do sistema mínimas
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+    curl build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# -------- Dependencies stage --------
+# Instala Poetry
+ENV POETRY_VERSION=1.8.3
+RUN pip install --no-cache-dir "poetry==$POETRY_VERSION"
+
+WORKDIR /app
+
+# -------- Dependencies --------
 FROM base AS deps
 
-COPY requirements-dev.txt .
+COPY pyproject.toml poetry.lock ./
 
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements-dev.txt
+# Configura Poetry para não criar venv dentro do container
+RUN poetry config virtualenvs.create false \
+    && poetry install --only main --no-interaction --no-ansi
 
-# -------- Final stage --------
+# -------- Final --------
 FROM base
 
 # Cria usuário não-root
@@ -29,18 +32,17 @@ RUN useradd --create-home appuser
 
 WORKDIR /home/appuser/app
 
+# Copia dependências já instaladas
 COPY --from=deps /usr/local/lib/python3.12 /usr/local/lib/python3.12
 COPY --from=deps /usr/local/bin /usr/local/bin
 
-COPY pyproject.toml README.md ./
+# Copia código
 COPY src/ ./src/
+COPY pyproject.toml README.md ./
 
 # Ajusta permissões
 RUN chown -R appuser:appuser /home/appuser/app
 
-# Agora troca usuário
 USER appuser
-
-RUN pip install --no-cache-dir .
 
 CMD ["python"]
